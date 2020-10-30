@@ -1,3 +1,6 @@
+static
+.docker_data
+
 ### Editors
 .idea
 .vscode
