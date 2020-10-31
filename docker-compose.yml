@@ -58,7 +58,7 @@ services:
       - default
 
   redis:
-    container_name: innohack-redis_db
+    container_name: innohack-redis-db
     image: library/redis:6
     command: redis-server --appendonly yes
     ports:

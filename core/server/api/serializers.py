@@ -3,8 +3,7 @@ from enum import Enum
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.models.validators import validate_site_event_data, validate_site_layout, validate_site_config
-from server.models import SiteEvent, EventType, Site, Sex, Worker
+from server.models import Site, SiteEvent, Worker, SensorReport
 
 
 def validate_enum(enum):
@@ -21,30 +20,30 @@ def validate_enum(enum):
     return validator
 
 
-class SiteEventSerializer(serializers.Serializer):
-    event_type = serializers.CharField(max_length=20, validators=[validate_enum(EventType)])
-    created_at = serializers.DateTimeField()
-    data = serializers.JSONField(validators=[validate_site_event_data], allow_null=True)
-
-    def create(self, validated_data):
-        return SiteEvent.objects.create(**validated_data)
+class SiteEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteEvent
+        fields = '__all__'
 
 
-class SiteSerializer(serializers.Serializer):
-    organization = serializers.PrimaryKeyRelatedField(queryset=Site.objects.all())
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Site
+        fields = '__all__'
+
+
+class WorkerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Worker
+        fields = '__all__'
+
+
+class SiteShortSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=100)
-    description = serializers.CharField(max_length=250, allow_null=True)
-    layout = serializers.JSONField(allow_null=True, validators=[validate_site_layout])
-    config = serializers.JSONField(allow_null=True, validators=[validate_site_config])
-
-    def create(self, validated_data):
-        return Site.objects.create(**validated_data)
+    id = serializers.IntegerField()
 
 
-class WorkerSerializer(serializers.Serializer):
-    sex = serializers.CharField(max_length=10, validators=[validate_enum(Sex)], default=Sex.MALE)
-    fio = serializers.CharField(max_length=100)
-    occupation = serializers.CharField(max_length=100)
-
-    def create(self, validated_data):
-        return Worker.objects.create(**validated_data)
+class SensorReportSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorReport
+        fields = ['sensor', 'data', 'created_at']

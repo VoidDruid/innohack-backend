@@ -1,14 +1,10 @@
-"""
+import redis
 
-POST запросы:
-
-"""
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import *
 from server.models import *
-import redis
 
 HOST: str = 'redis'
 PORT: int = 6379
@@ -25,22 +21,33 @@ def to_worker_key(id_):
 class SiteEventCreateView(generics.CreateAPIView):
     serializer_class = SiteEventSerializer
 
-    def perform_create(self, serializer):
-        return serializer.save()
-
 
 class SiteCreateView(generics.CreateAPIView):
     serializer_class = SiteSerializer
-
-    def perform_create(self, serializer):
-        return serializer.save()
 
 
 class WorkerCreateView(generics.CreateAPIView):
     serializer_class = WorkerSerializer
 
-    def perform_create(self, serializer):
-        return serializer.save()
+
+class WorkerView(generics.RetrieveAPIView):
+    queryset = Worker.objects.all()
+    serializer_class = WorkerSerializer
+
+
+class ShortSiteView(generics.RetrieveAPIView):
+    queryset = Site.objects.all()
+    serializer_class = SiteShortSerializer
+
+
+class SiteView(generics.RetrieveAPIView):
+    queryset = Site.objects.all()
+    serializer_class = SiteSerializer
+
+
+class ShortSiteListView(generics.ListAPIView):
+    queryset = Site.objects.all()
+    serializer_class = SiteShortSerializer
 
 
 class PositionView(APIView):
@@ -100,4 +107,3 @@ class PositionView(APIView):
         )
 
         return Response({'ok': True})
-
