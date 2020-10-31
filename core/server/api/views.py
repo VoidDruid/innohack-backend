@@ -1,10 +1,7 @@
 """
-Ключевые слова: views, serializer
 
 POST запросы:
-    - На создание SiteEvent
-    - На создание Site
-    - На создание Worker
+
 """
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
@@ -21,6 +18,13 @@ class SiteEventCreateView(generics.CreateAPIView):
 
 class SiteCreateView(generics.CreateAPIView):
     serializer_class = SiteSerializer
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+
+class WorkerCreateView(generics.CreateAPIView):
+    serializer_class = WorkerSerializer
 
     def perform_create(self, serializer):
         return serializer.save()

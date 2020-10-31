@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from server.models.validators import validate_site_event_data, validate_site_layout, validate_site_config
-from server.models import SiteEvent, EventType, Site
+from server.models import SiteEvent, EventType, Site, Sex, Worker
 
 
 def validate_enum(enum):
@@ -42,3 +42,11 @@ class SiteSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Site.objects.create(**validated_data)
 
+
+class WorkerSerializer(serializers.Serializer):
+    sex = serializers.CharField(max_length=10, validators=[validate_enum(Sex)], default=Sex.MALE)
+    fio = serializers.CharField(max_length=100)
+    occupation = serializers.CharField(max_length=100)
+
+    def create(self, validated_data):
+        return Worker.objects.create(**validated_data)
