@@ -30,7 +30,7 @@ class SiteShiftConfig(DBJson):
 
 
 class SiteConfig(DBJson):
-    shifts: List[SiteShiftConfig]
+    shifts: Optional[List[SiteShiftConfig]]
 
 
 class FreeDBJson(DBJson):

@@ -3,8 +3,8 @@ from enum import Enum
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.models.validators import validate_site_event_data
-from server.models import SiteEvent, EventType
+from server.models.validators import validate_site_event_data, validate_site_layout, validate_site_config
+from server.models import SiteEvent, EventType, Site
 
 
 def validate_enum(enum):
@@ -29,25 +29,16 @@ class SiteEventSerializer(serializers.Serializer):
     def create(self, validated_data):
         return SiteEvent.objects.create(**validated_data)
 
+
 class SiteSerializer(serializers.Serializer):
-
-    organization = models.ForeignKey(
-        Organization, on_delete=models.SET_NULL, related_name='sites', null=True
-    )
-    # Description
-    title = models.CharField(max_length=100)
-    description = models.CharField(max_length=250, null=True)
-    # Geometry
-    layout = models.JSONField(null=True, validators=[validate_site_layout])
-    long = models.FloatField()
-    lat = models.FloatField()
-    # Configuration
-    config = models.JSONField(null=True, validators=[validate_site_config])
-
-    event_type = serializers.CharField(max_length=20, validators=[validate_enum(EventType)])
-    created_at = serializers.DateTimeField()
-    data = serializers.JSONField(validators=[validate_site_event_data], allow_null=True)
+    organization = serializers.PrimaryKeyRelatedField(queryset=Site.objects.all())
+    title = serializers.CharField(max_length=100)
+    description = serializers.CharField(max_length=250, allow_null=True)
+    layout = serializers.JSONField(allow_null=True, validators=[validate_site_layout])
+    long = serializers.FloatField()
+    lat = serializers.FloatField()
+    config = serializers.JSONField(allow_null=True, validators=[validate_site_config])
 
     def create(self, validated_data):
-        return SiteEvent.objects.create(**validated_data)
+        return Site.objects.create(**validated_data)
 
