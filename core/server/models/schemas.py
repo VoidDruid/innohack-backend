@@ -37,4 +37,4 @@ class SiteEventData(FreeDBJson):
 
 
 class SiteLayout(FreeDBJson):
-   pass
+    pass
