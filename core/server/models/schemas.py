@@ -42,5 +42,5 @@ class SensorReportData(FreeDBJson):
     pass
 
 
-class SiteEventData(DBJson):
+class SiteEventData(FreeDBJson):
     pass
