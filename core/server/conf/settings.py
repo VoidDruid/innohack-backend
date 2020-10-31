@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'drf_yasg',
-    'server',
+    'server.app.ServerConfig',
 ]
 
 MIDDLEWARE = [
@@ -90,11 +90,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
+if DEBUG:
+    permissions = ['rest_framework.permissions.AllowAny']
+else:
+    permissions = [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
         'rest_framework.authentication.SessionAuthentication',
     ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': permissions,
+}
+
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'server.urls.openapi_info',
 }
 
 LANGUAGE_CODE = 'ru-RU'

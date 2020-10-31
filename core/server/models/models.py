@@ -1,6 +1,5 @@
 import uuid
 
-from django.contrib.postgres import fields as pg
 from django.db import models
 
 from .validators import (
@@ -21,9 +20,9 @@ class Sex:
 
 
 class EventType:
-    SHIFT_START = 'ss'
-    SHIFT_END = 'se'
-    INCIDENT = 'i'
+    SHIFT_START = 'shift_start'
+    SHIFT_END = 'shift_end'
+    INCIDENT = 'incident'
     CHOICES = (
         (SHIFT_START, 'Shift Start'),
         (SHIFT_END, 'Shift End'),
@@ -32,19 +31,16 @@ class EventType:
 
 
 class Organization(models.Model):
-    uid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=50)
 
 
 class Worker(models.Model):
-    uid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     sex = models.CharField(max_length=10, choices=Sex.CHOICES, default=Sex.MALE)
     fio = models.TextField()
     occupation = models.TextField()
 
 
 class Site(models.Model):
-    uid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     # Owner
     organization = models.ForeignKey(
         Organization, on_delete=models.SET_NULL, related_name='sites', null=True

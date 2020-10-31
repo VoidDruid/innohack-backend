@@ -10,12 +10,13 @@ if DEBUG:
 else:
     permission_classes = (permissions.IsAdminUser,)
 
+openapi_info = openapi.Info(
+    title='Innohack API',
+    default_version='v1',
+    description='Server API for data store',
+)
 schema_view = get_schema_view(
-    openapi.Info(
-        title='Innohack API',
-        default_version='v1',
-        description='Server API for data store',
-    ),
+    openapi_info,
     public=True,
     permission_classes=permission_classes,
 )
