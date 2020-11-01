@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
 }
 
 STATICFILES_DIRS = (
-    BASE_DIR / 'assets',
+    BASE_DIR / 'dist',
 )
 
 SWAGGER_SETTINGS = {
@@ -122,7 +122,7 @@ STATIC_ROOT = '/opt/static'
 WEBPACK_LOADER = {
     'DEFAULT': {
         'CACHE': not DEBUG,
-        'BUNDLE_DIR_NAME': 'webpack_bundles/',
+        'BUNDLE_DIR_NAME': 'dist/bundle/',
         'STATS_FILE': BASE_DIR / 'webpack-stats.json',
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,

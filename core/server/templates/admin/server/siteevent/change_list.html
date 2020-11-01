@@ -4,56 +4,9 @@
 {% block extrahead %}
 {{ block.super }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<script src="{% static 'bundle/lib.js' %}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const ctx = document.getElementById('SiteEventsDateChart').getContext('2d');
-
-  const chartData = {{ chart_data | safe }};
-
-  // Parse the dates to JS
-  chartData.forEach((d) => {
-    d.x = new Date(d.date);
-  });
-
-  // Render the chart
-  const chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      datasets: [
-        {
-          label: 'Происшествий',
-          data: chartData,
-          backgroundColor: 'rgba(220,20,20,0.5)',
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      scales: {
-        xAxes: [
-          {
-            type: 'time',
-            time: {
-              unit: 'day',
-              round: 'day',
-              displayFormats: {
-                day: 'MMM D',
-              },
-            },
-          },
-        ],
-        yAxes: [
-          {
-            ticks: {
-              beginAtZero: true,
-            },
-          },
-        ],
-      },
-    },
-  });
-});
+    document.addEventListener('DOMContentLoaded', lib.siteEventChart({{ chart_data | safe }}));
 </script>
 {% endblock %}
 

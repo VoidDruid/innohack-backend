@@ -4,13 +4,19 @@ var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
   context: __dirname,
-  entry: './assets/js/index',
+  entry: './assets/lib/index.js',
   output: {
-      path: path.resolve('./assets/webpack_bundles/'),
-      filename: "[name]-[hash].js"
+      path: path.resolve('./dist/bundle'),
+      filename: "lib.js",
+      library: 'lib',
+      libraryTarget:'umd'
   },
-
   plugins: [
-    new BundleTracker({filename: './webpack-stats.json'})
+    new BundleTracker({filename: './webpack-stats.json'}),
   ]
+  /* TODO
+  optimization: {
+    runtimeChunk: true
+  }
+  */
 }

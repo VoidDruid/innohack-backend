@@ -13,3 +13,7 @@ format:
 
 install_web:
 	npm i
+
+collect:
+	./node_modules/.bin/webpack --config webpack.config.js
+	./manage.py collectstatic --no-input
