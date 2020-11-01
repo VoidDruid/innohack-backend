@@ -2,6 +2,7 @@ import redis
 import base64
 from uuid import UUID
 
+from django.http import QueryDict
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.views import APIView
@@ -150,7 +151,11 @@ class SensorReportView(APIView):
     parser_classes = [MJSONParser]
 
     def post(self, request):
-        request_data = dict(request.data.iterlists())
+        if isinstance(request.data, QueryDict):
+            request_data = dict(request.data.iterlists())
+        else:
+            request_data = request.data
+
         uuid = request_data.pop('uuid', None)
         site_id = request_data.pop('site', None)
 
