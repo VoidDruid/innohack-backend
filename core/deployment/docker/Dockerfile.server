@@ -10,9 +10,13 @@ ENV PYTHONUNBUFFERED=on
 ENV PYTHONPATH=/opt/app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    build-essential && \
+    curl -sL https://deb.nodesource.com/setup_15.x | bash - \
+    && apt-get install -y nodejs npm \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
+RUN npm install -g bower
 RUN pip install "poetry==$POETRY_VERSION" \
     && poetry config virtualenvs.create false
 

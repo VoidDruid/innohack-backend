@@ -34,4 +34,5 @@ urlpatterns = [
     re_path(
         r'^api/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'
     ),
+    path('admin_tools_stats/', include('admin_tools_stats.urls')),
 ]

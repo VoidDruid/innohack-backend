@@ -124,7 +124,7 @@ class SiteEvent(models.Model):
     data = models.JSONField(validators=[validate_site_event_data], null=True)
 
     def __str__(self):
-        return f'({self.id}) {self.event_type} at ({self.site.title})'
+        return f'({self.id}) {self.event_type}'
 
 
 class ShiftReport(models.Model):

@@ -20,18 +20,25 @@ else:
     CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'admin_tools_stats',
+    'django.contrib.admin',
+    'djangobower',
     'corsheaders',
     'django_extensions',
     'rest_framework',
     'drf_yasg',
     'server.app.ServerConfig',
 ]
+
+BOWER_INSTALLED_APPS = (
+    'd3#3.3.13',
+    'nvd3#1.7.1',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,6 +68,8 @@ TEMPLATES = [
         },
     },
 ]
+
+BOWER_COMPONENTS_ROOT = BASE_DIR / 'components'
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
@@ -114,5 +123,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/opt/static'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'djangobower.finders.BowerFinder',
+)
 
 LOGIN_URL = '/admin/login'
