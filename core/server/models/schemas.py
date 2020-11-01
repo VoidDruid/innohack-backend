@@ -14,16 +14,6 @@ class DBJson(BaseModel):
         orm_mode = True
 
 
-class SiteLayoutPosition(DBJson):
-    lat: float
-    lon: float
-
-
-class SiteLayout(DBJson):
-    layout: Optional[StrDict]
-    position: SiteLayoutPosition
-
-
 class SiteShiftConfig(DBJson):
     starts_at: datetime
     ends_at: datetime
@@ -43,4 +33,8 @@ class SensorReportData(FreeDBJson):
 
 
 class SiteEventData(FreeDBJson):
+    pass
+
+
+class SiteLayout(FreeDBJson):
     pass

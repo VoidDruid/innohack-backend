@@ -50,8 +50,7 @@ class Site(models.Model):
     description = models.CharField(max_length=250, null=True)
     # Geometry
     layout = models.JSONField(null=True, validators=[validate_site_layout])
-    long = models.FloatField()
-    lat = models.FloatField()
+    corners = models.JSONField(null=True)  # TODO: validators
     # Configuration
     config = models.JSONField(null=True, validators=[validate_site_config])
 
