@@ -102,7 +102,6 @@ class SiteEventAdmin(SiteBound):
     list_filter = ('site__title', 'event_type')  # TODO: titles not unique
 
     def changelist_view(self, request, extra_context=None):
-        # Aggregate new subscribers per day
         chart_data = (
             SiteEvent.objects.annotate(date=TruncDay('created_at'))
             .values('date')
@@ -112,7 +111,6 @@ class SiteEventAdmin(SiteBound):
 
         as_json = json.dumps(list(chart_data), cls=DjangoJSONEncoder)
         extra_context = extra_context or {'chart_data': as_json}
-
         return super().changelist_view(request, extra_context=extra_context)
 
 
@@ -160,3 +158,26 @@ class SiteAdmin(admin.ModelAdmin):
 
     organization_title.admin_order_field = 'organization__title'
     organization_title.short_description = 'Застройщик'
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        shifts = Shift.objects.filter(site_id=object_id).order_by('-time_point').all()
+        workers_data = {}
+        for shift in shifts:
+            if shift.data is None:
+                continue
+            dt = str(shift.time_point.date())
+            v = workers_data.get(dt, 0)
+            v += shift.data['workers']
+            workers_data[dt] = v
+
+        workers_info = []
+        from datetime import datetime
+        for key, value in workers_data.items():
+            workers_info.append({
+                'date': datetime.strptime(key, '%Y-%m-%d'),
+                'y': value,
+            })
+
+        as_json = json.dumps(workers_info, cls=DjangoJSONEncoder)
+        extra_context = extra_context or {'chart_data': as_json}
+        return self.changeform_view(request, object_id, form_url, extra_context)
