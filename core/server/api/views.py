@@ -1,4 +1,5 @@
 import redis
+import base64
 
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -90,7 +91,7 @@ class PositionView(APIView):
         lat = request.data.get("lat", None)
         lon = request.data.get("lon", None)
         if worker_id is None or site_id is None or lat is None or lon is None:
-            return Response({"OK": "False", "Description": "worker_id, site_id, lat and lon should not be None"})
+            return Response({"ok": False, "Description": "worker_id, site_id, lat and lon should not be None"})
 
         worker_key = to_worker_key(worker_id)
         site_key = to_site_key(site_id)
@@ -107,3 +108,25 @@ class PositionView(APIView):
         )
 
         return Response({'ok': True})
+
+
+class SensorReportView(APIView):
+    queryset = SensorReport.objects.all()
+
+    def post(self, request):
+        uuid = request.data.pop('uuid', None)
+        site = request.data.pop('site', None)
+
+        if uuid is None or site is None:
+            return Response({'ok': False, "Description": "uuid and site should not be None"})
+
+        data = {
+            'site': site,
+            'uid': uuid,
+            'data': request.data
+        }
+        serializer = SensorReportSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response({'ok': True})
+        return Response({'ok': False})

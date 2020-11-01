@@ -46,4 +46,4 @@ class SiteShortSerializer(serializers.Serializer):
 class SensorReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorReport
-        fields = ['sensor', 'data', 'created_at']
+        fields = '__all__'
