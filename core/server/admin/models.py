@@ -5,7 +5,16 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count
 from django.db.models.functions import TruncDay
 
-from server.models import Worker, Site, Organization, Sensor, SensorReport, Shift, SiteEvent, ShiftReport
+from server.models import (
+    Organization,
+    Sensor,
+    SensorReport,
+    Shift,
+    Site,
+    SiteEvent,
+    Worker,
+)
+from .forms import *
 
 
 class SiteBound(admin.ModelAdmin):
@@ -15,6 +24,7 @@ class SiteBound(admin.ModelAdmin):
         if obj.site is not None:
             return obj.site.title
         return None
+
     site_title.admin_order_field = 'site__title'
     site_title.short_description = 'Площадка'
 
@@ -48,16 +58,41 @@ class SensorReportAdmin(SiteBound):
 
 @admin.register(Shift)
 class ShiftAdmin(SiteBound):
-    list_display = ('started_at', 'finished_at', 'site_title')
+    list_display = ('started_at', 'finished_at', 'site_title', 'has_report')
     search_fields = ('site__title',)
     list_filter = ('site__title',)  # TODO: titles not unique
+    fieldsets = (
+        (
+            None,
+            {
+                'fields': ('site',),
+            },
+        ),
+        (
+            'Параметры смены',
+            {
+                'fields': ('started_at', 'finished_at'),
+            },
+        ),
+        (
+            'Прочие данные',
+            {
+                'classes': ('collapse',),
+                'fields': ('has_report', 'data', 'time_point'),
+            },
+        ),
+        (
+            'Статистика',
+            {
+                'fields': (),
+            },
+        ),
+    )
+    readonly_fields = ('has_report', 'data', 'time_point')
 
-
-@admin.register(ShiftReport)
-class ShiftReportAdmin(SiteBound):
-    list_display = ('site_title',)
-    search_fields = ('site__title',)
-    list_filter = ('site__title',)  # TODO: titles not unique
+    def has_report(self, obj):
+        return bool(obj.data)
+    has_report.short_description = 'Отчет готов'
 
 
 @admin.register(SiteEvent)
@@ -69,15 +104,14 @@ class SiteEventAdmin(SiteBound):
     def changelist_view(self, request, extra_context=None):
         # Aggregate new subscribers per day
         chart_data = (
-            SiteEvent.objects
-                .annotate(date=TruncDay('created_at'))
-                .values('date')
-                .annotate(y=Count('id'))
-                .order_by("-date")
+            SiteEvent.objects.annotate(date=TruncDay('created_at'))
+            .values('date')
+            .annotate(y=Count('id'))
+            .order_by('-date')
         )
 
         as_json = json.dumps(list(chart_data), cls=DjangoJSONEncoder)
-        extra_context = extra_context or {"chart_data": as_json}
+        extra_context = extra_context or {'chart_data': as_json}
 
         return super().changelist_view(request, extra_context=extra_context)
 
@@ -89,19 +123,31 @@ class SiteAdmin(admin.ModelAdmin):
     search_fields = ('organization__title', 'title')
 
     fieldsets = (
-        (None, {
-            'fields': ('organization',),
-        }),
-        ('Описание', {
-            'fields': ('title', 'description'),
-        }),
-        ('Параметры', {
-            'classes': ('collapse',),
-            'fields': ('layout', 'corners', 'config'),
-        }),
-        ('Статистика', {
-            'fields': ('current_workers',),
-        }),
+        (
+            None,
+            {
+                'fields': ('organization',),
+            },
+        ),
+        (
+            'Описание',
+            {
+                'fields': ('title', 'description'),
+            },
+        ),
+        (
+            'Параметры',
+            {
+                'classes': ('collapse',),
+                'fields': ('layout', 'corners', 'config'),
+            },
+        ),
+        (
+            'Статистика',
+            {
+                'fields': ('current_workers',),
+            },
+        ),
     )
     readonly_fields = ('current_workers',)
 
@@ -111,6 +157,6 @@ class SiteAdmin(admin.ModelAdmin):
         if obj.organization is not None:
             return obj.organization.title
         return None
+
     organization_title.admin_order_field = 'organization__title'
     organization_title.short_description = 'Застройщик'
-

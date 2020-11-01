@@ -3,7 +3,7 @@ from enum import Enum
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from server.models import Site, SiteEvent, Worker, SensorReport
+from server.models import SensorReport, Site, SiteEvent, Worker
 
 
 def validate_enum(enum):

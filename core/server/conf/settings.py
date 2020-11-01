@@ -103,9 +103,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': permissions,
 }
 
-STATICFILES_DIRS = (
-    BASE_DIR / 'dist',
-)
+STATICFILES_DIRS = (BASE_DIR / 'dist',)
 
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'server.urls.openapi_info',
