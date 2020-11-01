@@ -9,6 +9,7 @@ def forwards_func(apps, schema_editor):
     for site_event in SiteEvent.objects.using(db_alias).all():
         if site_event.data is not None and 'site_id' in site_event.data:
             site_event.site_id = site_event.data.pop('site_id')
+        site_event.save()
 
 
 def reverse_func(apps, schema_editor):
@@ -18,6 +19,7 @@ def reverse_func(apps, schema_editor):
     for site_event in SiteEvent.objects.using(db_alias).all():
         if site_event.site_id is not None:
             site_event.data['site_id'] = site_event.site_id
+        site_event.save()
 
 
 class Migration(migrations.Migration):
