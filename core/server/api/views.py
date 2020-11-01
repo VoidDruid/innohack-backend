@@ -11,6 +11,7 @@ from server.models import *
 HOST: str = 'redis'
 PORT: int = 6379
 
+
 def to_site_key(id_):
     return f'site:{id_}'
 
@@ -21,6 +22,13 @@ def to_worker_key(id_):
 
 class SiteEventCreateView(generics.CreateAPIView):
     serializer_class = SiteEventSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data.get('data', None)
+        if data is not None and 'site_id' in data:
+            request.data['site_id'] = data.pop('site_id')
+
+        return super().post(request, *args, **kwargs)
 
 
 class SiteCreateView(generics.CreateAPIView):

@@ -57,7 +57,7 @@ class Site(models.Model):
 
 class Sensor(models.Model):
     # on device uids are coded with `base64.urlsafe_b64encode(uuid.uuid4().bytes).rstrip(b'=').decode('ascii')`
-    uid = models.UUIDField(unique=True, editable=False)
+    uid = models.UUIDField(unique=True)
     site = models.ForeignKey(Site, on_delete=models.SET_NULL, related_name='sensors', null=True)
 
 
@@ -75,6 +75,7 @@ class Shift(models.Model):
 
 
 class SiteEvent(models.Model):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='site_events', null=True)
     event_type = models.CharField(max_length=20, choices=EventType.CHOICES)
     created_at = models.DateTimeField(auto_now=True)
     data = models.JSONField(validators=[validate_site_event_data], null=True)
