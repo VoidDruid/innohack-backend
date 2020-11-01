@@ -10,3 +10,6 @@ format:
 	isort --profile black $(CODE)
 	black --line-length=100 --skip-string-normalization $(CODE)
 	unify --in-place --recursive $(CODE)
+
+install_web:
+	npm i

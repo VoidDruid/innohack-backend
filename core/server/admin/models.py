@@ -1,6 +1,9 @@
-import base64
+import json
 
 from django.contrib import admin
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Count
+from django.db.models.functions import TruncDay
 
 from server.models import Worker, Site, Organization, Sensor, SensorReport, Shift, SiteEvent, ShiftReport
 
@@ -62,6 +65,21 @@ class SiteEventAdmin(SiteBound):
     list_display = ('event_type', 'site_title', 'created_at')
     search_fields = ('site__title', 'data')
     list_filter = ('site__title', 'event_type')  # TODO: titles not unique
+
+    def changelist_view(self, request, extra_context=None):
+        # Aggregate new subscribers per day
+        chart_data = (
+            SiteEvent.objects
+                .annotate(date=TruncDay('created_at'))
+                .values('date')
+                .annotate(y=Count('id'))
+                .order_by("-date")
+        )
+
+        as_json = json.dumps(list(chart_data), cls=DjangoJSONEncoder)
+        extra_context = extra_context or {"chart_data": as_json}
+
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Site)
