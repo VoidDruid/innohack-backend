@@ -115,20 +115,45 @@ class SensorReportView(APIView):
 
     def post(self, request):
         uuid = request.data.pop('uuid', None)
-        site = request.data.pop('site', None)
+        site_id = request.data.pop('site', None)
 
-        if uuid is None or site is None:
+        if uuid is None or site_id is None:
             return Response({'ok': False, "Description": "uuid and site should not be None"})
         uuid = UUID(bytes=base64.urlsafe_b64decode(uuid.encode('ascii')+'=='.encode('ascii')))
-        print(uuid)
         data = {
-            'site': site,
+            'site': site_id,
             'uid': uuid.hex,
             'data': request.data
         }
-        print(data)
+
         serializer = SensorReportSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response({'ok': True})
         return Response({'ok': False})
+
+    def get(self, request):
+        site_id = request.GET.get('site_id', None)
+        if site_id is None:
+            return Response({'ok': False, 'error': 'Provide site_id'})
+
+        reports = SensorReport.objects.raw("""
+        select data, created_at, uid, site_id, id from (
+            select
+                data,
+                created_at,
+                uid,
+                site_id,
+                id,
+                row_number() over(partition by uid order by created_at desc) as rn
+            from
+                server_sensorreport
+        ) t
+        where t.rn = 1
+        """)
+
+        data = []
+        for report in reports:
+            data.append(SensorReportSerializer(instance=report).data)
+
+        return Response(data)
