@@ -1,5 +1,6 @@
 import redis
 import base64
+from uuid import UUID
 
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -9,7 +10,6 @@ from server.models import *
 
 HOST: str = 'redis'
 PORT: int = 6379
-
 
 def to_site_key(id_):
     return f'site:{id_}'
@@ -119,12 +119,14 @@ class SensorReportView(APIView):
 
         if uuid is None or site is None:
             return Response({'ok': False, "Description": "uuid and site should not be None"})
-
+        uuid = UUID(bytes=base64.urlsafe_b64decode(uuid.encode('ascii')+'=='.encode('ascii')))
+        print(uuid)
         data = {
             'site': site,
-            'uid': uuid,
+            'uid': uuid.hex,
             'data': request.data
         }
+        print(data)
         serializer = SensorReportSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()

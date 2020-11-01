@@ -62,7 +62,7 @@ class Sensor(models.Model):
 
 
 class SensorReport(models.Model):
-    uid = models.CharField(max_length=100, unique=False, editable=False)
+    uid = models.UUIDField()
     site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='sensor_reports')
     data = models.JSONField(validators=[validate_sensor_report_data])
     created_at = models.DateTimeField(auto_now=True)
