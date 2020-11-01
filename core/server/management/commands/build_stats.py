@@ -16,7 +16,7 @@ class Command(BaseCommand):
         return (
             (datetime.combine(date, time(hour=7)), datetime.combine(date, time(hour=15))),
             (datetime.combine(date, time(hour=15)), datetime.combine(date, time(hour=23))),
-            (datetime.combine(date, time(hour=23)), datetime.combine(date, time(hour=7))),
+            (datetime.combine(date, time(hour=23)), datetime.combine(date+timedelta(days=1), time(hour=7))),
         )
 
     @staticmethod
