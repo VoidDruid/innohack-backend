@@ -35,13 +35,12 @@ class SensorAdmin(SiteBound):
     search_fields = ('site__title', 'uid')
     list_filter = ('site__title',)  # TODO: titles not unique
 
-    def short_uid(self, obj):
-        return base64.urlsafe_b64encode(obj.uid.bytes).rstrip(b'=').decode('ascii')
-
 
 @admin.register(SensorReport)
-class SensorReportAdmin(SensorAdmin):
+class SensorReportAdmin(SiteBound):
     list_display = ('created_at', 'site_title', 'uid', 'short_uid')
+    search_fields = ('site__title', 'uid')
+    list_filter = ('site__title',)  # TODO: titles not unique
 
 
 @admin.register(Shift)
@@ -70,6 +69,23 @@ class SiteAdmin(admin.ModelAdmin):
     list_display = ('organization_title', 'id', 'title')
     list_filter = ('organization__title',)
     search_fields = ('organization__title', 'title')
+
+    fieldsets = (
+        (None, {
+            'fields': ('organization',),
+        }),
+        ('Описание', {
+            'fields': ('title', 'description'),
+        }),
+        ('Параметры', {
+            'classes': ('collapse',),
+            'fields': ('layout', 'corners', 'config'),
+        }),
+        ('Статистика', {
+            'fields': ('current_workers',),
+        }),
+    )
+    readonly_fields = ('current_workers',)
 
     list_select_related = ('organization',)
 
