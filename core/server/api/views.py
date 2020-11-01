@@ -150,8 +150,9 @@ class SensorReportView(APIView):
     parser_classes = [MJSONParser]
 
     def post(self, request):
-        uuid = request.data.pop('uuid', None)
-        site_id = request.data.pop('site', None)
+        request_data = dict(request.data.iterlists())
+        uuid = request_data.pop('uuid', None)
+        site_id = request_data.pop('site', None)
 
         if uuid is None or site_id is None:
             return Response({'ok': False, "Description": "uuid and site should not be None"})
@@ -159,7 +160,7 @@ class SensorReportView(APIView):
         data = {
             'site': site_id,
             'uid': uuid.hex,
-            'data': request.data
+            'data': request_data
         }
 
         serializer = SensorReportSerializer(data=data)
