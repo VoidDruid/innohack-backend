@@ -2,10 +2,10 @@ from pathlib import Path
 
 import environ
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env()
-with open(BASE_DIR / '../.env') as env_file:
+with open(BASE_DIR / '.env') as env_file:
     env.read_env(env_file)
 
 SECRET_KEY = env.str('SECRET_KEY')
@@ -20,25 +20,19 @@ else:
     CORS_ALLOWED_ORIGINS = ALLOWED_HOSTS
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'admin_tools_stats',
-    'django.contrib.admin',
-    'djangobower',
+    'webpack_loader',
     'corsheaders',
     'django_extensions',
     'rest_framework',
     'drf_yasg',
     'server.app.ServerConfig',
 ]
-
-BOWER_INSTALLED_APPS = (
-    'd3#3.3.13',
-    'nvd3#1.7.1',
-)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -56,7 +50,7 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'server' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,8 +62,6 @@ TEMPLATES = [
         },
     },
 ]
-
-BOWER_COMPONENTS_ROOT = BASE_DIR / 'components'
 
 WSGI_APPLICATION = 'server.wsgi.application'
 
@@ -111,6 +103,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': permissions,
 }
 
+STATICFILES_DIRS = (BASE_DIR / 'dist',)
+
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'server.urls.openapi_info',
 }
@@ -123,10 +117,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/opt/static'
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'djangobower.finders.BowerFinder',
-)
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'CACHE': not DEBUG,
+        'BUNDLE_DIR_NAME': 'dist/bundle/',
+        'STATS_FILE': BASE_DIR / 'webpack-stats.json',
+        'POLL_INTERVAL': 0.1,
+        'TIMEOUT': None,
+        'IGNORE': [r'.+\.hot-update.js', r'.+\.map'],
+        'LOADER_CLASS': 'webpack_loader.loader.WebpackLoader',
+    }
+}
 
 LOGIN_URL = '/admin/login'

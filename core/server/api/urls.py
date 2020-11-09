@@ -11,5 +11,5 @@ urlpatterns = [
     path('site/short', ShortSiteListView.as_view()),
     path('site/<str:pk>', SiteView.as_view()),
     path('site/short/<str:pk>', ShortSiteView.as_view()),
-    path('metrics', SensorReportView.as_view())
+    path('metrics', SensorReportView.as_view()),
 ]

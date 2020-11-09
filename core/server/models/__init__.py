@@ -1,1 +1,11 @@
-from .models import Organization, Sensor, SensorReport, Sex, Shift, ShiftReport, Site, Worker, SiteEvent, EventType
+from .models import (
+    EventType,
+    Organization,
+    Sensor,
+    SensorReport,
+    Sex,
+    Shift,
+    Site,
+    SiteEvent,
+    Worker,
+)

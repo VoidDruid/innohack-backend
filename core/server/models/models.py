@@ -112,6 +112,13 @@ class Shift(models.Model):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='shifts')
     started_at = models.DateTimeField()
     finished_at = models.DateTimeField()
+    time_point = models.DateTimeField()
+    data = models.JSONField(null=True)
+
+    def save(self, *args, **kwargs):
+        delta = self.finished_at - self.started_at
+        self.time_point = self.started_at + delta / 2
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.started_at} at ({self.site.title})'
@@ -125,7 +132,3 @@ class SiteEvent(models.Model):
 
     def __str__(self):
         return f'({self.id}) {self.event_type}'
-
-
-class ShiftReport(models.Model):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, related_name='shift_reports')

@@ -1,8 +1,20 @@
-import base64
+import json
 
 from django.contrib import admin
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Count
+from django.db.models.functions import TruncDay
 
-from server.models import Worker, Site, Organization, Sensor, SensorReport, Shift, SiteEvent, ShiftReport
+from server.models import (
+    Organization,
+    Sensor,
+    SensorReport,
+    Shift,
+    Site,
+    SiteEvent,
+    Worker,
+)
+from .forms import *
 
 
 class SiteBound(admin.ModelAdmin):
@@ -12,6 +24,7 @@ class SiteBound(admin.ModelAdmin):
         if obj.site is not None:
             return obj.site.title
         return None
+
     site_title.admin_order_field = 'site__title'
     site_title.short_description = 'Площадка'
 
@@ -45,16 +58,41 @@ class SensorReportAdmin(SiteBound):
 
 @admin.register(Shift)
 class ShiftAdmin(SiteBound):
-    list_display = ('started_at', 'finished_at', 'site_title')
+    list_display = ('started_at', 'finished_at', 'site_title', 'has_report')
     search_fields = ('site__title',)
     list_filter = ('site__title',)  # TODO: titles not unique
+    fieldsets = (
+        (
+            None,
+            {
+                'fields': ('site',),
+            },
+        ),
+        (
+            'Параметры смены',
+            {
+                'fields': ('started_at', 'finished_at'),
+            },
+        ),
+        (
+            'Прочие данные',
+            {
+                'classes': ('collapse',),
+                'fields': ('has_report', 'data', 'time_point'),
+            },
+        ),
+        (
+            'Статистика',
+            {
+                'fields': (),
+            },
+        ),
+    )
+    readonly_fields = ('has_report', 'data', 'time_point')
 
-
-@admin.register(ShiftReport)
-class ShiftReportAdmin(SiteBound):
-    list_display = ('site_title',)
-    search_fields = ('site__title',)
-    list_filter = ('site__title',)  # TODO: titles not unique
+    def has_report(self, obj):
+        return bool(obj.data)
+    has_report.short_description = 'Отчет готов'
 
 
 @admin.register(SiteEvent)
@@ -62,6 +100,18 @@ class SiteEventAdmin(SiteBound):
     list_display = ('event_type', 'site_title', 'created_at')
     search_fields = ('site__title', 'data')
     list_filter = ('site__title', 'event_type')  # TODO: titles not unique
+
+    def changelist_view(self, request, extra_context=None):
+        chart_data = (
+            SiteEvent.objects.annotate(date=TruncDay('created_at'))
+            .values('date')
+            .annotate(y=Count('id'))
+            .order_by('-date')
+        )
+
+        as_json = json.dumps(list(chart_data), cls=DjangoJSONEncoder)
+        extra_context = extra_context or {'chart_data': as_json}
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 @admin.register(Site)
@@ -71,19 +121,31 @@ class SiteAdmin(admin.ModelAdmin):
     search_fields = ('organization__title', 'title')
 
     fieldsets = (
-        (None, {
-            'fields': ('organization',),
-        }),
-        ('Описание', {
-            'fields': ('title', 'description'),
-        }),
-        ('Параметры', {
-            'classes': ('collapse',),
-            'fields': ('layout', 'corners', 'config'),
-        }),
-        ('Статистика', {
-            'fields': ('current_workers',),
-        }),
+        (
+            None,
+            {
+                'fields': ('organization',),
+            },
+        ),
+        (
+            'Описание',
+            {
+                'fields': ('title', 'description'),
+            },
+        ),
+        (
+            'Параметры',
+            {
+                'classes': ('collapse',),
+                'fields': ('layout', 'corners', 'config'),
+            },
+        ),
+        (
+            'Статистика',
+            {
+                'fields': ('current_workers',),
+            },
+        ),
     )
     readonly_fields = ('current_workers',)
 
@@ -93,6 +155,29 @@ class SiteAdmin(admin.ModelAdmin):
         if obj.organization is not None:
             return obj.organization.title
         return None
+
     organization_title.admin_order_field = 'organization__title'
     organization_title.short_description = 'Застройщик'
 
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        shifts = Shift.objects.filter(site_id=object_id).order_by('-time_point').all()
+        workers_data = {}
+        for shift in shifts:
+            if shift.data is None:
+                continue
+            dt = str(shift.time_point.date())
+            v = workers_data.get(dt, 0)
+            v += shift.data['workers']
+            workers_data[dt] = v
+
+        workers_info = []
+        from datetime import datetime
+        for key, value in workers_data.items():
+            workers_info.append({
+                'date': datetime.strptime(key, '%Y-%m-%d'),
+                'y': value,
+            })
+
+        as_json = json.dumps(workers_info, cls=DjangoJSONEncoder)
+        extra_context = extra_context or {'chart_data': as_json}
+        return self.changeform_view(request, object_id, form_url, extra_context)

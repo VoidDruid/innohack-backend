@@ -1,4 +1,4 @@
-FROM python:3.8-slim
+FROM python:3.8-slim-buster
 
 ENV POETRY_VERSION=1.0.2
 
@@ -10,13 +10,11 @@ ENV PYTHONUNBUFFERED=on
 ENV PYTHONPATH=/opt/app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential && \
-    curl -sL https://deb.nodesource.com/setup_15.x | bash - \
-    && apt-get install -y nodejs npm \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential curl && \
+    curl -sL https://deb.nodesource.com/setup_15.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g bower
 RUN pip install "poetry==$POETRY_VERSION" \
     && poetry config virtualenvs.create false
 

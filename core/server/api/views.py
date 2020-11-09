@@ -1,14 +1,15 @@
-import redis
 import base64
 from uuid import UUID
 
+import redis
 from django.http import QueryDict
 from rest_framework import generics
-from rest_framework.exceptions import ParseError
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import *
+from rest_framework.views import APIView
+
 from server.models import *
+
+from .serializers import *
 
 HOST: str = 'redis'
 PORT: int = 6379
@@ -83,25 +84,29 @@ class PositionView(APIView):
             lat = redis_db.hget(name=worker_key, key='lat')
             lon = redis_db.hget(name=worker_key, key='lon')
 
-            workers_list.append({
-                'worker_id': worker_id,
-                'lon': lon,
-                'lat': lat,
-                'site_id': site_id,
-                'worker_name': worker.fio
-            })
+            workers_list.append(
+                {
+                    'worker_id': worker_id,
+                    'lon': lon,
+                    'lat': lat,
+                    'site_id': site_id,
+                    'worker_name': worker.fio,
+                }
+            )
 
         return Response({'ok': True, 'workers_list': workers_list})
 
     def post(self, request):
         redis_db = redis.Redis(host=HOST, port=PORT)
 
-        worker_id = request.data.get("worker_id", None)
-        site_id = request.data.get("site_id", None)
-        lat = request.data.get("lat", None)
-        lon = request.data.get("lon", None)
+        worker_id = request.data.get('worker_id', None)
+        site_id = request.data.get('site_id', None)
+        lat = request.data.get('lat', None)
+        lon = request.data.get('lon', None)
         if worker_id is None or site_id is None or lat is None or lon is None:
-            return Response({"ok": False, "Description": "worker_id, site_id, lat and lon should not be None"})
+            return Response(
+                {'ok': False, 'Description': 'worker_id, site_id, lat and lon should not be None'}
+            )
 
         worker_key = to_worker_key(worker_id)
         site_key = to_site_key(site_id)
@@ -113,9 +118,7 @@ class PositionView(APIView):
                 last_site_key = to_site_key(last_site_id)
                 redis_db.srem(last_site_key, worker_id)
 
-        redis_db.hset(
-            name=worker_key, mapping={'site_id': site_id, 'lat': lat, 'lon': lon}
-        )
+        redis_db.hset(name=worker_key, mapping={'site_id': site_id, 'lat': lat, 'lon': lon})
 
         return Response({'ok': True})
 
@@ -133,13 +136,9 @@ class SensorReportView(APIView):
         site_id = request_data.pop('site', None)
 
         if uuid is None or site_id is None:
-            return Response({'ok': False, "Description": "uuid and site should not be None"})
-        uuid = UUID(bytes=base64.urlsafe_b64decode(uuid.encode('ascii')+'=='.encode('ascii')))
-        data = {
-            'site': site_id,
-            'uid': uuid.hex,
-            'data': request_data
-        }
+            return Response({'ok': False, 'Description': 'uuid and site should not be None'})
+        uuid = UUID(bytes=base64.urlsafe_b64decode(uuid.encode('ascii') + '=='.encode('ascii')))
+        data = {'site': site_id, 'uid': uuid.hex, 'data': request_data}
 
         serializer = SensorReportSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
@@ -152,7 +151,8 @@ class SensorReportView(APIView):
         if site_id is None:
             return Response({'ok': False, 'error': 'Provide site_id'})
 
-        reports = SensorReport.objects.raw("""
+        reports = SensorReport.objects.raw(
+            """
         select data, created_at, uid, site_id, id from (
             select
                 data,
@@ -165,7 +165,8 @@ class SensorReportView(APIView):
                 server_sensorreport
         ) t
         where t.rn = 1
-        """)
+        """
+        )
 
         data = []
         for report in reports:

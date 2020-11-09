@@ -1,5 +1,5 @@
-from django.db import migrations, models
 import django.db.models.deletion
+from django.db import migrations, models
 
 
 def forwards_func(apps, schema_editor):
@@ -32,7 +32,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='siteevent',
             name='site',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='site_events', to='server.site'),
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name='site_events',
+                to='server.site',
+            ),
         ),
         migrations.AlterField(
             model_name='sensor',
